@@ -14,4 +14,6 @@ More specifically, the dynamic module loading utilities in
 ## usage
 
 1. Run `yarn` to install dependencies.
-2. Run `yarn serve` to serve prebuilt dist (or `yarn start` to serve from source).
+2. Run `yarn build` to build the packages.
+3. Run `yarn serve` to serve prebuilt dist (or `yarn start` to serve from source).
+4. Visit the app at `localhost:3001`

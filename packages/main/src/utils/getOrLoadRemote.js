@@ -21,6 +21,7 @@ export const getOrLoadRemote = (
 
     // check if it was initialized
     if (globalThis[remote].__initialized) return resolve();
+    // goofy iiafe b/c container.init sometimes returns undefined instead of a promise...
     (async () => {
       await globalThis[remote].init(
         // if share scope doesn't exist (like in webpack 4) then expect shareScope to be a manual object

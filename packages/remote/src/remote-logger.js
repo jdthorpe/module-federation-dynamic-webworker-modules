@@ -14,5 +14,4 @@ const counter_module = loadComponent(
 export async function remoteLogger() {
   const { get_count } = await counter_module;
   postMessage(`Hello from the remote logger (count = ${get_count()})`);
-  console.log("globalThis", globalThis);
 }

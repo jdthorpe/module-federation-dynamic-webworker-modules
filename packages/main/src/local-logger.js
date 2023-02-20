@@ -1,6 +1,8 @@
 import { loadComponent } from "./utils/loadComponent";
 
-const useDynamicImport = true;
+// This toggle provided just to show that the dynamic module loading is
+// compatible with static loading...
+const useDynamicImport = false;
 
 let counter_module;
 if (useDynamicImport) {

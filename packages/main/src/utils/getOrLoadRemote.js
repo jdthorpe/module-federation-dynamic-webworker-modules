@@ -9,28 +9,23 @@ export const getOrLoadRemote = (
     // for keeping track of the modules that have begun loading.  This is done in the original with the
     // `<script webpack-data="modulename"...>` tags that load the modules, but
     // we don't have that here, so we have to do it manually with a dictionary or promises.
-    console.log("hello");
     globalThis.__webpack_modules_loading__ =
       globalThis.__webpack_modules_loading__ || {};
 
-    console.log("1");
     const modules_to_load = modules.filter(
       (module) => !(module.remote in globalThis.__webpack_modules_loading__)
     );
 
-    console.log("3");
     if (modules_to_load.length === 0)
       // all modules already started, resolve with a promise.all of the modules
       return resolve(
         Promise.all(modules.map((module) => globalThis[module.remote]))
       );
 
-    console.log("4");
     const urls_to_load = modules_to_load
       .filter((module) => typeof globalThis[module.remote] === "undefined")
       .map((module) => module.url);
-    console.log(modules_to_load);
-    console.log(urls_to_load);
+
     try {
       // load the modules that need to be loaded
       importScripts(...urls_to_load);
@@ -38,7 +33,6 @@ export const getOrLoadRemote = (
       return reject(e);
     }
 
-    console.log("5");
     // initialize the modules that need to be initialized
     for (module of modules_to_load) {
       const { remote, shareScope } = module;
@@ -55,7 +49,7 @@ export const getOrLoadRemote = (
             )
         );
     }
-    console.log("bye");
+
     return resolve(
       Promise.all(modules.map((module) => globalThis[module.remote]))
     );

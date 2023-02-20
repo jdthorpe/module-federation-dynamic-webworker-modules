@@ -2,7 +2,6 @@ import { getOrLoadRemote } from "./getOrLoadRemote";
 
 export const loadComponent = (remote, sharedScope, module, url) => {
   return async () => {
-    console.log("about to load '" + remote + "'");
     await getOrLoadRemote([{ remote, sharedScope, url }]);
     const container = globalThis[remote];
     const factory = await container.get(module);

@@ -26,11 +26,11 @@ provide an api that cannot be exactly recapitulated in a web worker. Specificall
 - The code in `packages/main/src/utils/getOrLoadComponent.js` allows for
   (down)loading multiple packages in parallel, taking advantage of the fact
   that additional arguments to `importscripts()` are downloaded in parallel,
-  much like the multiple `<script>` tags that would be created in the
-  original method. This requires a bit more work to keep track of the
-  already-in-progress downloads (using a dictionary of promises instead of a
-  document full of `<script>` tags). This is exposed in the
-  `loadComponents()` function, illustrated in [`packages/main/src/worker.js`](https://github.com/jdthorpe/module-federation-dynamic-webworker-modules/blob/main/packages/main/src/worker.js).
+  much like the multiple `<script>` tags that would be created with multiple
+  asynchronous calls to the original method. This requires a bit more work to
+  keep track of the already-in-progress downloads (using a dictionary of
+  promises instead of a document full of `<script>` tags). This is exposed in
+  the `loadComponents()` function, illustrated in [`packages/main/src/worker.js`](https://github.com/jdthorpe/module-federation-dynamic-webworker-modules/blob/main/packages/main/src/worker.js).
 
 ## usage
 

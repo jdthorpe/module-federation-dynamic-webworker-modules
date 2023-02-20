@@ -1,39 +1,62 @@
+// interface module_config { remote, shareScope, url?: string }
+
+// declare globalThis.__webpack_modules_loading__: {[x:string]: Promise<any>}
+
 export const getOrLoadRemote = (
-  remote,
-  shareScope,
-  remoteFallbackUrl = undefined
+  modules // : module_config[]
 ) =>
   new Promise((resolve, reject) => {
-    // check if remote exists on globalThis
-    if (globalThis[remote])
-      // remote already instantiated, resolve
-      return resolve();
+    // for keeping track of the modules that have begun loading.  This is done in the original with the
+    // `<script webpack-data="modulename"...>` tags that load the modules, but
+    // we don't have that here, so we have to do it manually with a dictionary or promises.
+    console.log("hello");
+    globalThis.__webpack_modules_loading__ =
+      globalThis.__webpack_modules_loading__ || {};
 
-    if (!remoteFallbackUrl)
-      // no remote and no fallback exist, reject
-      return reject(`Cannot Find Remote ${remote} to inject`);
+    console.log("1");
+    const modules_to_load = modules.filter(
+      (module) => !(module.remote in globalThis.__webpack_modules_loading__)
+    );
 
+    console.log("3");
+    if (modules_to_load.length === 0)
+      // all modules already started, resolve with a promise.all of the modules
+      return resolve(
+        Promise.all(modules.map((module) => globalThis[module.remote]))
+      );
+
+    console.log("4");
+    const urls_to_load = modules_to_load
+      .filter((module) => typeof globalThis[module.remote] === "undefined")
+      .map((module) => module.url);
+    console.log(modules_to_load);
+    console.log(urls_to_load);
     try {
-      importScripts(remoteFallbackUrl);
+      // load the modules that need to be loaded
+      importScripts(...urls_to_load);
     } catch (e) {
       return reject(e);
     }
 
-    // check if it was initialized
-    if (globalThis[remote].__initialized) return resolve();
-    // goofy iiafe b/c container.init sometimes returns undefined instead of a promise...
-    (async () => {
-      await globalThis[remote].init(
-        // if share scope doesn't exist (like in webpack 4) then expect shareScope to be a manual object
-        typeof __webpack_share_scopes__ === "undefined"
-          ? // use default share scope object passed in manually
-            shareScope.default
-          : // otherwise, init share scope as usual
-            __webpack_share_scopes__[shareScope]
-      );
-      // mark remote as initialized
-      globalThis[remote].__initialized = true;
-      // resolve promise so marking remote as loaded
-      resolve();
-    })();
+    console.log("5");
+    // initialize the modules that need to be initialized
+    for (module of modules_to_load) {
+      const { remote, shareScope } = module;
+      if (!remote in globalThis.__webpack_modules_loading__)
+        globalThis.__webpack_modules_loading__[remote] = new Promise(
+          async () =>
+            await globalThis[remote].init(
+              // if share scope doesn't exist (like in webpack 4) then expect shareScope to be a manual object
+              typeof __webpack_share_scopes__ === "undefined"
+                ? // use default share scope object passed in manually
+                  shareScope.default
+                : // otherwise, init share scope as usual
+                  __webpack_share_scopes__[shareScope]
+            )
+        );
+    }
+    console.log("bye");
+    return resolve(
+      Promise.all(modules.map((module) => globalThis[module.remote]))
+    );
   });

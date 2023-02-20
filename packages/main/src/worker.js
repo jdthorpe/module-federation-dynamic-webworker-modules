@@ -1,18 +1,24 @@
 import { localLogger } from "./local-logger";
-import { loadComponent } from "./utils/loadComponent";
+import { loadComponents } from "./utils/loadComponent";
 
 (async function main() {
-  // without this call the webpack runtime will try to load this via a <script> tag, but webworkers have no DOM access.
-  importScripts("//localhost:3002/remoteEntry.js");
+  // load two remote modules in parallel
+  const [{ remoteLogger }, { get_count }] = await loadComponents([
+    {
+      remote: "remote",
+      sharedScope: "default",
+      module: "./remote-logger",
+      url: "http://localhost:3002/remoteEntry.js",
+    },
+    {
+      remote: "shared",
+      sharedScope: "default",
+      module: "./counter",
+      url: "http://localhost:3003/remoteEntry.js",
+    },
+  ])();
 
-  // log from a local module
+  postMessage(`Hello from the main worker: (count = ${get_count()})`);
   localLogger();
-
-  const { remoteLogger } = await loadComponent(
-    "remote",
-    "default",
-    "./remote-logger",
-    "http://localhost:3002/remoteEntry.js"
-  )();
   remoteLogger();
 })();
